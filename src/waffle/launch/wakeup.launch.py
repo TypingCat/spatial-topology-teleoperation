@@ -31,7 +31,10 @@ def generate_launch_description():
             PythonLaunchDescriptionSource([
                 os.path.join(get_package_share_directory('waffle'), 'launch'), '/turtlebot/bringup.launch.py']),
             launch_arguments={'use_sim_time': use_sim_time}.items()),
-        IncludeLaunchDescription(
-            PythonLaunchDescriptionSource([
-                os.path.join(get_package_share_directory('waffle'), 'launch'), '/turtlebot/camera.launch.py'])),
+        Node(
+            package='realsense_ros2_camera',
+            node_executable='realsense_ros2_camera',
+            node_name='realsense_ros2_camera',
+            output='screen',
+            remappings=[('/tf_static', 'tf_realsense')]),
     ])

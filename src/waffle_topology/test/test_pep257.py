@@ -1,6 +1,4 @@
-#!/usr/bin/env python3
-#
-# Copyright 2019 ROBOTIS CO., LTD.
+# Copyright 2015 Open Source Robotics Foundation, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,21 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from launch import LaunchDescription
-from launch_ros.actions import Node
+from ament_pep257.main import main
+import pytest
 
 
-def generate_launch_description():
-
-    return LaunchDescription([
-        Node(
-            package='joy',
-            node_executable='joy_node',
-            node_name='joy_node',
-            output='screen'),
-        Node(
-            package='waffle',
-            node_executable='control',
-            node_name='control',
-            output='screen'),
-    ])
+@pytest.mark.linter
+@pytest.mark.pep257
+def test_pep257():
+    rc = main(argv=['.', 'test'])
+    assert rc == 0, 'Found code style errors / warnings'
