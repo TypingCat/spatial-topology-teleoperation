@@ -1,0 +1,4 @@
+[submodule "src/rplidar_ros"]
+	path = src/rplidar_ros
+	url = https://github.com/allenh1/rplidar_ros.git
+	branch = ros2
