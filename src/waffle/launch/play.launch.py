@@ -32,13 +32,4 @@ def generate_launch_description():
             remappings=[
                 ('/in/compressed', '/camera/color/image_raw/compressed'),
                 ('/out', '/camera/color/image_raw/uncompressed')]),
-        Node(
-            package='image_transport',
-            node_executable='republish',
-            node_name='image_segmentation_transport',
-            arguments=['compressed', 'raw'],
-            output='screen',
-            remappings=[
-                ('/in/compressed', '/camera/color/segmentation/compressed'),
-                ('/out', '/camera/color/segmentation/uncompressed')]),
     ])

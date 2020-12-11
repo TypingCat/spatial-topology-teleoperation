@@ -14,6 +14,7 @@ ros2 launch waffle play.launch.py
     - [rplidar_ros](https://github.com/allenh1/rplidar_ros.git) 2.0.0(submodule)
     - [ros2_intel_realsense](https://github.com/intel/ros2_intel_realsense)
     - [cartographer_ros](https://google-cartographer-ros.readthedocs.io/en/latest/compilation.html#building-installation)
+    - [image_transport](https://index.ros.org/p/image_transport/github-ros-perception-image_common/#dashing)
 
 ``` bash
 git clone https://github.com/finiel/waffle.git
