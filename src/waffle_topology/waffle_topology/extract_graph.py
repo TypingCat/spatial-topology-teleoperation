@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import rclpy
 from rclpy.node import Node
 
@@ -129,7 +131,7 @@ class Graph():
                     neighbor[contour_idx] = count
                 elif d_ <= dist_threshold:
                     count = 0
-                    idx = contour_idx - int(neighbor[contour_idx-1] / 2)
+                    idx = contour_idx - (neighbor[contour_idx-1] // 2)
                     nodes_index[idx] = node_idx
                 d_ = d
 
@@ -236,9 +238,14 @@ class Extract_graph(Node):
         self.scan_angle_max = 2.35
         self.scan_radius = 5.0
         self.scan_map_resolution = 0.05
-        self.scan_map_shape = (int(2*self.scan_radius/self.scan_map_resolution), int(2*self.scan_radius/self.scan_map_resolution), 1)
-        self.scan_map_center = (int(self.scan_map_shape[0]/2), int(self.scan_map_shape[1]/2))
         self.occupancy_img_threshold = 127
+
+        self.scan_map_shape = (
+            int((2*self.scan_radius) // self.scan_map_resolution),
+            int((2*self.scan_radius) // self.scan_map_resolution, 1))
+        self.scan_map_center = (
+            int(self.scan_map_shape[0] // 2),
+            int(self.scan_map_shape[1] // 2))
 
         # Initialize ROS node
         super().__init__('waffle_topology_server')
