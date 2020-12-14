@@ -21,7 +21,7 @@ setup(
     entry_points={
         'console_scripts': [
             'deproject_scan = waffle_topology.deproject_scan:main',
-            'extract_graph = waffle_topology.extract_graph:main'
+            'extract_topology = waffle_topology.extract_topology:main'
         ],
     },
 )
