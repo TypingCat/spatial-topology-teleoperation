@@ -121,35 +121,6 @@ class Graph:
                 n_ = n
         return edges
 
-    # def search_closest_edge(self, pose):
-    #     """Return closest edge[departure node, destination node] from pose"""
-
-    #     # Search closest node
-    #     nodes_dist = []
-    #     for node in self.nodes:
-    #         nodes_dist.append((node.point.x - pose[0])**2 + (node.point.y - pose[1])**2)
-    #     node_closest = self.nodes[nodes_dist.index(min(nodes_dist))]
-
-    #     # Search closest edges in angle
-    #     edges_abs_angle = []
-    #     for node in node_closest.neighbors:
-    #         angle = math.atan2(
-    #             node.point.y - node_closest.point.y,
-    #             node.point.x - node_closest.point.x
-    #         ) - pose[2]
-    #         edges_abs_angle.append(abs((angle + 3*math.pi) % (2*math.pi) - math.pi))
-    #         angle = math.atan2(
-    #             node_closest.point.y - node.point.y,
-    #             node_closest.point.x - node.point.x
-    #         ) - pose[2]
-    #         edges_abs_angle.append(abs((angle + 3*math.pi) % (2*math.pi) - math.pi))
-        
-    #     idx = edges_abs_angle.index(min(edges_abs_angle))
-    #     if int(idx%2) == 0:
-    #         return [node_closest, node_closest.neighbors[int(idx/2)]]
-    #     else:
-    #         return [node_closest.neighbors[int(idx/2)], node_closest]
-
     def search_closest_edge(self, pose):
         """Return closest edge[departure node, destination node] from pose"""
 
@@ -168,25 +139,11 @@ class Graph:
             edges_dist.append((edge_point[0] - pose[0])**2 + (edge_point[1] - pose[1])**2)
         edge_closest = edges[edges_dist.index(min(edges_dist))]
 
-        # Search closest edge in angle
+        # Calculate relative angle of the edge
         edge_angle = math.atan2(
             edge_closest[1].point.x - edge_closest[0].point.x,
             edge_closest[1].point.y - edge_closest[0].point.y
         ) - pose[2]
         edges_angle = (edge_angle + 3*math.pi) % (2*math.pi) - math.pi
 
-        # print(edges_angle)
-
-        # angle = math.atan2(
-        #     node_closest.point.y - node.point.y,
-        #     node_closest.point.x - node.point.x
-        # ) - pose[2]
-        # edges_abs_angle.append(abs((angle + 3*math.pi) % (2*math.pi) - math.pi))
-        
-        # idx = edges_abs_angle.index(min(edges_abs_angle))
-        # if int(idx%2) == 0:
-        #     return [node_closest, node_closest.neighbors[int(idx/2)]]
-        # else:
-        #     return [node_closest.neighbors[int(idx/2)], node_closest]
-
-        return edge_closest
+        return edge_closest if abs(edges_angle) < math.pi/2 else edge_closest[::-1]
