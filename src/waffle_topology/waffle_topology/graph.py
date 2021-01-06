@@ -1,22 +1,34 @@
 #!/usr/bin/env python3
 
+from nav_msgs.msg import OccupancyGrid
+from geometry_msgs.msg import Point
+from std_msgs.msg import ColorRGBA
+
 import cv2
 import numpy as np
 import math
+import copy
 
-class Node():
-    def __init__(self, id, point):
-        self.id = id
+class Node:
+    def __init__(self, point:Point):
         self.point = point
         self.neighbors = []
+        self.color = Color()
 
-class Graph():
-    """Topology graph from a gridmap topology image"""
-    seq = -1
+class Color:
+    NODE = ColorRGBA(r=0.53, g=0.9, b=0.5, a=0.2)        # Green
+    EDGE = ColorRGBA(r=0.53, g=0.9, b=0.5, a=0.2)        # Green
+    INTERSECTION = ColorRGBA(r=1., g=0.73, b=0., a=0.2)  # Yellow
+    LEAF = ColorRGBA(r=0.95, g=0.37, b=0.37, a=0.2)      # Red
 
-    def __init__(self, msg, pose):
-        Graph.seq += 1
+    def __init__(self):
+        self.node = copy.deepcopy(Color.NODE)
+        self.edges = []
 
+class Graph:
+    """Linked list graph"""
+
+    def __init__(self, msg:OccupancyGrid, pose):
         # Extract features
         img = self.convert_map_to_image(msg)
         topology = cv2.ximgproc.thinning(img)
@@ -26,7 +38,7 @@ class Graph():
         # Search nodes and edges
         nodes_idx = list(map(lambda corner: [
             int(corner[0][0]), int(corner[0][1])], corners))
-        edges_idx = self.search_edges(
+        edges_idx = self._search_edges_idx(
             nodes_idx,
             list(map(lambda contour: [contour[0][0], contour[0][1]], contours[0])))
         
@@ -40,15 +52,29 @@ class Graph():
 
         # Construct nodes
         self.nodes = []
-        for i, point in enumerate(nodes_point_global):
-            self.nodes.append(Node([Graph.seq, i], point))
+        for p in nodes_point_global:
+            point = Point(x=p[0], y=p[1])
+            self.add_node(point)
         for edge in edges_idx:
+            self.add_neighbor(edge)
+
+        # Update nodes color
+        for node in self.nodes:
+            if(len(node.neighbors) == 1):
+                node.color.node = copy.deepcopy(Color.LEAF)
+            elif(len(node.neighbors) > 2):
+                node.color.node = copy.deepcopy(Color.INTERSECTION)
+    
+    def add_node(self, point):
+        self.nodes.append(Node(point))
+
+    def add_neighbor(self, edge):
+        if self.nodes[edge[0]] != self.nodes[edge[1]]:  # Reject circular loop
             self.nodes[edge[0]].neighbors.append(self.nodes[edge[1]])
+            self.nodes[edge[0]].color.edges.append(
+                [copy.deepcopy(Color.EDGE), copy.deepcopy(Color.EDGE)])
 
-        # Analysis graph
-        self.root = self.search_closest_edge(pose)
-
-    def convert_map_to_image(self, msg):
+    def convert_map_to_image(self, msg:OccupancyGrid):
         img = np.zeros([msg.info.width, msg.info.height], np.uint8)
         for n, d in enumerate(msg.data):
             if(d == 0):
@@ -57,7 +83,7 @@ class Graph():
                 img[i, j] = 255
         return img
         
-    def search_edges(self, nodes, contours, dist_threshold=3):
+    def _search_edges_idx(self, nodes, contours, dist_threshold=3):
         """Search node connectivity from contour"""
 
         # Search closest node index
@@ -95,22 +121,72 @@ class Graph():
                 n_ = n
         return edges
 
+    # def search_closest_edge(self, pose):
+    #     """Return closest edge[departure node, destination node] from pose"""
+
+    #     # Search closest node
+    #     nodes_dist = []
+    #     for node in self.nodes:
+    #         nodes_dist.append((node.point.x - pose[0])**2 + (node.point.y - pose[1])**2)
+    #     node_closest = self.nodes[nodes_dist.index(min(nodes_dist))]
+
+    #     # Search closest edges in angle
+    #     edges_abs_angle = []
+    #     for node in node_closest.neighbors:
+    #         angle = math.atan2(
+    #             node.point.y - node_closest.point.y,
+    #             node.point.x - node_closest.point.x
+    #         ) - pose[2]
+    #         edges_abs_angle.append(abs((angle + 3*math.pi) % (2*math.pi) - math.pi))
+    #         angle = math.atan2(
+    #             node_closest.point.y - node.point.y,
+    #             node_closest.point.x - node.point.x
+    #         ) - pose[2]
+    #         edges_abs_angle.append(abs((angle + 3*math.pi) % (2*math.pi) - math.pi))
+        
+    #     idx = edges_abs_angle.index(min(edges_abs_angle))
+    #     if int(idx%2) == 0:
+    #         return [node_closest, node_closest.neighbors[int(idx/2)]]
+    #     else:
+    #         return [node_closest.neighbors[int(idx/2)], node_closest]
+
     def search_closest_edge(self, pose):
         """Return closest edge[departure node, destination node] from pose"""
 
         # Search closest node
         nodes_dist = []
         for node in self.nodes:
-            nodes_dist.append((node.point[0] - pose[0])**2 + (node.point[1] - pose[1])**2)
-        node_departure = self.nodes[nodes_dist.index(min(nodes_dist))]
+            nodes_dist.append((node.point.x - pose[0])**2 + (node.point.y - pose[1])**2)
+        node_closest = self.nodes[nodes_dist.index(min(nodes_dist))]
+        edges = list(map(lambda neighbor: [node_closest, neighbor], node_closest.neighbors))
 
-        # Search closest edges in angle
-        edges_abs_angle = []
-        for node in node_departure.neighbors:
-            angle = math.atan2(
-                node.point[1] - node_departure.point[1],
-                node.point[0] - node_departure.point[0]
-            ) - pose[2]
-            edges_abs_angle.append(abs((angle + 3*math.pi) % (2*math.pi) - math.pi))
+        # Search closest edge
+        edges_dist = []
+        for edge in edges:
+            edge_point = [0.5*(edge[0].point.x + edge[1].point.x),
+                 0.5*(edge[0].point.y + edge[1].point.y)]
+            edges_dist.append((edge_point[0] - pose[0])**2 + (edge_point[1] - pose[1])**2)
+        edge_closest = edges[edges_dist.index(min(edges_dist))]
+
+        # Search closest edge in angle
+        edge_angle = math.atan2(
+            edge_closest[1].point.x - edge_closest[0].point.x,
+            edge_closest[1].point.y - edge_closest[0].point.y
+        ) - pose[2]
+        edges_angle = (edge_angle + 3*math.pi) % (2*math.pi) - math.pi
+
+        # print(edges_angle)
+
+        # angle = math.atan2(
+        #     node_closest.point.y - node.point.y,
+        #     node_closest.point.x - node.point.x
+        # ) - pose[2]
+        # edges_abs_angle.append(abs((angle + 3*math.pi) % (2*math.pi) - math.pi))
         
-        return [node_departure, self.nodes[edges_abs_angle.index(min(edges_abs_angle))]]
+        # idx = edges_abs_angle.index(min(edges_abs_angle))
+        # if int(idx%2) == 0:
+        #     return [node_closest, node_closest.neighbors[int(idx/2)]]
+        # else:
+        #     return [node_closest.neighbors[int(idx/2)], node_closest]
+
+        return edge_closest
