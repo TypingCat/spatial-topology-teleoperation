@@ -5,11 +5,7 @@ from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
 from nav_msgs.msg import OccupancyGrid
 from nav_msgs.msg import Odometry
-from geometry_msgs.msg import Point
 from visualization_msgs.msg import Marker
-
-import math
-import copy
 
 from waffle_topology.graph import Graph
 
@@ -39,7 +35,7 @@ class Extract_topology(Node):
         try:
             topology = Graph(msg, self.robot_pose)
         except:
-            print("Graph generation failed", msg.header.stamp.sec)
+            self.get_logger().warning("Graph generation failed")
             return
 
         # Search root
@@ -50,66 +46,17 @@ class Extract_topology(Node):
         root[0].color.edges[root_idx][1].a = 1.
 
         # Visualize graph
-        nodes_marker, edges_marker = self.generate_markers(msg, topology)
+        nodes_marker, edges_marker = topology.generate_markers(msg)
         self.nodes_publisher.publish(nodes_marker)
         self.edges_publisher.publish(edges_marker)
 
     def odom_callback(self, msg):
-        yaw = self.quaternion_to_euler(
+        yaw = Graph.quaternion_to_euler(
             msg.pose.pose.orientation.x,
             msg.pose.pose.orientation.y,
             msg.pose.pose.orientation.z,
             msg.pose.pose.orientation.w)
         self.robot_pose = [msg.pose.pose.position.x, msg.pose.pose.position.y, yaw]
-    
-    def quaternion_to_euler(self, x, y, z, w):
-        """Only returns yaw"""
-
-        # t0 = 2.*(w*x + y*z)
-        # t1 = 1. - 2.*(x*x + y*y)
-        # roll = math.atan2(t0, t1)
-        # t2 = 2.*(w*y - z*x)
-        # t2 = 1. if t2 > 1. else t2
-        # t2 = -1. if t2 < -1. else t2
-        # pitch = math.asin(t2)
-        t3 = 2.*(w*z + x*y)
-        t4 = 1. - 2.*(y*y + z*z)
-        yaw = math.atan2(t3, t4)
-        return yaw
-
-    def generate_markers(self, msg, graph:Graph):
-        # Initialize node marker
-        nodes_marker = Marker()
-        nodes_marker.header = copy.deepcopy(msg.header)
-        nodes_marker.header.frame_id = 'odom'
-        nodes_marker.ns = 'node'
-        nodes_marker.id = 0
-        nodes_marker.type = Marker.POINTS
-        nodes_marker.action = Marker.ADD
-        nodes_marker.scale.x = 0.1      # Point width
-        nodes_marker.scale.y = 0.1      # Point height
-
-        # Initialize edge marker
-        edges_marker = Marker()
-        edges_marker.header = copy.deepcopy(msg.header)
-        edges_marker.header.frame_id = 'odom'
-        edges_marker.ns = 'edge'
-        edges_marker.id = 0
-        edges_marker.type = Marker.LINE_LIST
-        edges_marker.action = Marker.ADD
-        edges_marker.scale.x = 0.03     # Line width
-
-        # Fill in the rest
-        for node in graph.nodes:
-            nodes_marker.points.append(Point(x=-node.point.x, y=-node.point.y, z=0.1))
-            nodes_marker.colors.append(node.color.node)
-            for i, neighbor in enumerate(node.neighbors):
-                edges_marker.points.append(Point(x=-node.point.x, y=-node.point.y, z=0.1))
-                edges_marker.points.append(Point(x=-neighbor.point.x, y=-neighbor.point.y, z=0.1))
-                edges_marker.colors.append(node.color.edges[i][0])
-                edges_marker.colors.append(node.color.edges[i][1])
-
-        return nodes_marker, edges_marker
 
 def main(args=None):
     rclpy.init(args=args)
