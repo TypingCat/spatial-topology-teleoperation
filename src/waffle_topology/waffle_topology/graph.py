@@ -123,7 +123,7 @@ class Graph:
 
         # Fill in the rest
         for node in self.nodes:
-            nodes_marker.points.append(Point(x=-node.point.x, y=-node.point.y, z=0.1))
+            nodes_marker.points.append(Point(x=-node.point.x, y=-node.point.y, z=0.2))
             nodes_marker.colors.append(node.color.node)
             for i, neighbor in enumerate(node.neighbors):
                 edges_marker.points.append(Point(x=-node.point.x, y=-node.point.y, z=0.1))
@@ -197,3 +197,7 @@ class Graph:
         edges_angle = (edge_angle + 3*math.pi) % (2*math.pi) - math.pi
 
         return edge_closest if abs(edges_angle) < math.pi/2 else edge_closest[::-1]
+
+class EmptyGraph(Graph):
+    def __init__(self):
+        self.nodes = []

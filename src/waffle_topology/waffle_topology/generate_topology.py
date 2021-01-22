@@ -8,13 +8,15 @@ from nav_msgs.msg import Odometry
 from visualization_msgs.msg import Marker
 
 from waffle_topology.graph import Graph
+from waffle_topology.graph import EmptyGraph
 
-class Extract_topology(Node):
+class Generate_topology(Node):
     def __init__(self):
         # Set parameters
         self.scan_radius = 5.0
         self.scan_map_resolution = 0.05
 
+        self.topology = EmptyGraph()
         self.scan = LaserScan()
         self.scan_map_shape = (
             int((2*self.scan_radius) // self.scan_map_resolution),
@@ -24,7 +26,7 @@ class Extract_topology(Node):
             int(self.scan_map_shape[1] // 2))
 
         # Initialize a ROS node
-        super().__init__('waffle_topology_extract_topology')
+        super().__init__('waffle_topology_generate_topology')
         self.area_subscription = self.create_subscription(OccupancyGrid, '/topology/area', self.area_callback, 1)
         self.odom_subscription = self.create_subscription(Odometry, '/odom', self.odom_callback, 1)
         self.nodes_publisher = self.create_publisher(Marker, '/topology/nodes', 10)
@@ -33,20 +35,32 @@ class Extract_topology(Node):
     def area_callback(self, msg):
         # Generate graph from gridmap message
         try:
-            topology = Graph(msg, self.robot_pose)
+            g = Graph(msg, self.robot_pose)
         except:
             self.get_logger().warning("Graph generation failed")
             return
 
         # Search root
-        root = topology.search_closest_edge(self.robot_pose)
-        root_idx = root[0].neighbors.index(root[1])
-        root[1].color.node.a = 1.
-        root[0].color.edges[root_idx][0].a = 1.
-        root[0].color.edges[root_idx][1].a = 1.
+        # try:
+        #     root = g.search_closest_edge(self.robot_pose)
+        #     root_idx = root[0].neighbors.index(root[1])
+        #     root[1].color.node.a = 1.
+        #     root[0].color.edges[root_idx][0].a = 1.
+        #     root[0].color.edges[root_idx][1].a = 1.
+        # except:
+        #     pass
+
+        # Accumulate intersections
+        # self.topology = g
+        for node in g.nodes:
+            if len(node.neighbors) > 2:
+                self.topology.nodes.append(node)
+        print(len(self.topology.nodes))
+
+
 
         # Visualize graph
-        nodes_marker, edges_marker = topology.generate_markers(msg)
+        nodes_marker, edges_marker = self.topology.generate_markers(msg)
         self.nodes_publisher.publish(nodes_marker)
         self.edges_publisher.publish(edges_marker)
 
@@ -60,7 +74,7 @@ class Extract_topology(Node):
 
 def main(args=None):
     rclpy.init(args=args)
-    node = Extract_topology()
+    node = Generate_topology()
     rclpy.spin(node)
     node.destroy_node()
     rclpy.shutdown()
