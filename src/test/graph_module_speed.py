@@ -84,7 +84,6 @@ def test_neo4j(num, sim=False):
     return [b - a for a, b in zip(time_elapsed[:-1], time_elapsed[1:])]
 
 if __name__ == '__main__':
-    # num = 5 * 60 * 2
     num = 500
     num_ignore = 30
 
