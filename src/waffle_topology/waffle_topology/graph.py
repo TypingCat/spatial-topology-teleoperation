@@ -3,6 +3,7 @@
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Point
 from std_msgs.msg import ColorRGBA
+from visualization_msgs.msg import Marker
 
 import cv2
 import numpy as np
@@ -30,7 +31,7 @@ class Graph:
 
     def __init__(self, msg:OccupancyGrid, pose):
         # Extract features
-        img = self.convert_map_to_image(msg)
+        img = Graph._convert_map_to_image(msg)
         topology = cv2.ximgproc.thinning(img)
         contours, _ = cv2.findContours(topology, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
         corners = cv2.goodFeaturesToTrack(topology, 20, 0.1, 6)
@@ -38,7 +39,7 @@ class Graph:
         # Search nodes and edges
         nodes_idx = list(map(lambda corner: [
             int(corner[0][0]), int(corner[0][1])], corners))
-        edges_idx = self._search_edges_idx(
+        edges_idx = Graph._search_edges_idx(
             nodes_idx,
             list(map(lambda contour: [contour[0][0], contour[0][1]], contours[0])))
         
@@ -74,7 +75,7 @@ class Graph:
             self.nodes[edge[0]].color.edges.append(
                 [copy.deepcopy(Color.EDGE), copy.deepcopy(Color.EDGE)])
 
-    def convert_map_to_image(self, msg:OccupancyGrid):
+    def _convert_map_to_image(msg:OccupancyGrid):
         img = np.zeros([msg.info.width, msg.info.height], np.uint8)
         for n, d in enumerate(msg.data):
             if(d == 0):
@@ -82,8 +83,57 @@ class Graph:
                 j = int(n / msg.info.width)
                 img[i, j] = 255
         return img
+
+    def quaternion_to_euler(x, y, z, w):
+        """Only returns yaw"""
+
+        # t0 = 2.*(w*x + y*z)
+        # t1 = 1. - 2.*(x*x + y*y)
+        # roll = math.atan2(t0, t1)
+        # t2 = 2.*(w*y - z*x)
+        # t2 = 1. if t2 > 1. else t2
+        # t2 = -1. if t2 < -1. else t2
+        # pitch = math.asin(t2)
+        t3 = 2.*(w*z + x*y)
+        t4 = 1. - 2.*(y*y + z*z)
+        yaw = math.atan2(t3, t4)
+        return yaw
+
+    def generate_markers(self, msg):
+        # Initialize node marker
+        nodes_marker = Marker()
+        nodes_marker.header = copy.deepcopy(msg.header)
+        nodes_marker.header.frame_id = 'odom'
+        nodes_marker.ns = 'node'
+        nodes_marker.id = 0
+        nodes_marker.type = Marker.POINTS
+        nodes_marker.action = Marker.ADD
+        nodes_marker.scale.x = 0.1      # Point width
+        nodes_marker.scale.y = 0.1      # Point height
+
+        # Initialize edge marker
+        edges_marker = Marker()
+        edges_marker.header = copy.deepcopy(msg.header)
+        edges_marker.header.frame_id = 'odom'
+        edges_marker.ns = 'edge'
+        edges_marker.id = 0
+        edges_marker.type = Marker.LINE_LIST
+        edges_marker.action = Marker.ADD
+        edges_marker.scale.x = 0.03     # Line width
+
+        # Fill in the rest
+        for node in self.nodes:
+            nodes_marker.points.append(Point(x=-node.point.x, y=-node.point.y, z=0.2))
+            nodes_marker.colors.append(node.color.node)
+            for i, neighbor in enumerate(node.neighbors):
+                edges_marker.points.append(Point(x=-node.point.x, y=-node.point.y, z=0.1))
+                edges_marker.points.append(Point(x=-neighbor.point.x, y=-neighbor.point.y, z=0.1))
+                edges_marker.colors.append(node.color.edges[i][0])
+                edges_marker.colors.append(node.color.edges[i][1])
+
+        return nodes_marker, edges_marker
         
-    def _search_edges_idx(self, nodes, contours, dist_threshold=3):
+    def _search_edges_idx(nodes, contours, dist_threshold=3):
         """Search node connectivity from contour"""
 
         # Search closest node index
@@ -147,3 +197,7 @@ class Graph:
         edges_angle = (edge_angle + 3*math.pi) % (2*math.pi) - math.pi
 
         return edge_closest if abs(edges_angle) < math.pi/2 else edge_closest[::-1]
+
+class EmptyGraph(Graph):
+    def __init__(self):
+        self.nodes = []

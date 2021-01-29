@@ -15,10 +15,10 @@ def generate_launch_description():
     return LaunchDescription([
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
-                os.path.join(get_package_share_directory('waffle'), 'launch'), '/slam.launch.py']),
+                os.path.join(get_package_share_directory('waffle'), 'launch'), '/turtlebot/slam.launch.py']),
             launch_arguments={'use_sim_time': use_sim_time}.items()),
         IncludeLaunchDescription(
             PythonLaunchDescriptionSource([
-                os.path.join(get_package_share_directory('waffle'), 'launch'), '/navigation.launch.py']),
+                os.path.join(get_package_share_directory('waffle'), 'launch'), '/turtlebot/navigation.launch.py']),
             launch_arguments={'use_sim_time': use_sim_time}.items()),
     ])
