@@ -50,14 +50,15 @@ class Generate_topology(Node):
         # except:
         #     pass
 
-        # Accumulate intersections
-        # self.topology = g
-        for node in g.nodes:
-            if len(node.neighbors) > 2:
-                self.topology.nodes.append(node)
+        # Save intersections
+        # for node in g.nodes:
+        #     if len(node.neighbors) > 2:
+        #         self.topology.nodes.append(node)
+        # print(len(self.topology.nodes))
+
+        # Save local topology
+        self.topology = g
         print(len(self.topology.nodes))
-
-
 
         # Visualize graph
         nodes_marker, edges_marker = self.topology.generate_markers(msg)

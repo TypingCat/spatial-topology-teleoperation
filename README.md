@@ -19,8 +19,8 @@ The following is a simple demo video of the [local topology extraction](https://
     ```
 - Generate topology
     ``` bash
-    ros2 run waffle_deproject_scan
-    ros2 run waffle_generate_topology
+    ros2 run waffle_topology deproject_scan
+    ros2 run waffle_topology generate_topology
     ```
 
 
