@@ -3,9 +3,9 @@ ROS2 package that develops wheeled mobile robot for semantic teleoperation
 
 
 ## Goals
-The main purpose of this package is to service semantic commands such as 'turn left' and 'go to table'. There is no need to prepare a map in advance, because topology is extracted in real time. This topology contains spatial structure and things of interest. See issue [#3](https://github.com/finiel/waffle/issues/3) for details.
+The main purpose of this package is to service semantic commands such as 'turn left' and 'go to table'. There is no need to prepare a map in advance, because topology is extracted in real time. This topology contains spatial structure and things of interest. See issue [#3](https://github.com/TypingCat/waffle/issues/3) for details.
 
-The following is a simple demo video of the [local topology extraction](https://github.com/finiel/waffle/issues/6). This robot is moving from the hallway to the room, and extracting topology in real time. Note that intersections are represented by yellow points.
+The following is a simple demo video of the [local topology extraction](https://github.com/TypingCat/waffle/issues/6). This robot is moving from the hallway to the room, and extracting topology in real time. Note that intersections are represented by yellow points.
 
 ![extract_topology](https://user-images.githubusercontent.com/16618451/105449922-a6fae680-5cbc-11eb-8043-47b890e61912.gif)
 
@@ -25,7 +25,7 @@ The following is a simple demo video of the [local topology extraction](https://
 
 
 ## Setup
-This package is being developed with [modified Turtlebot3](https://github.com/finiel/waffle/issues/8).
+This package is being developed with [modified Turtlebot3](https://github.com/TypingCat/waffle/issues/8).
 
 ![hardware](https://user-images.githubusercontent.com/16618451/105457365-0ca19f80-5cca-11eb-8dd6-8a64d6c7ac5a.png)
 
@@ -38,7 +38,7 @@ This package is being developed with [modified Turtlebot3](https://github.com/fi
     - [image_transport](https://index.ros.org/p/image_transport/github-ros-perception-image_common/#dashing)
 
 ``` bash
-git clone https://github.com/finiel/waffle.git
+git clone https://github.com/TypingCat/waffle.git
 cd waffle
 colcon build --symlink-install
 source install/local_setup.bash

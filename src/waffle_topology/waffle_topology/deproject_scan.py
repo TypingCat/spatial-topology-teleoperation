@@ -33,7 +33,7 @@ class Deproject_scan(Node):
         self.scan_sample_publisher = self.create_publisher(PointCloud, '/scan/sample', 10)
         self.scan_subscription = self.create_subscription(LaserScan, '/scan', self.scan_callback, 1)
         self.area_publisher = self.create_publisher(OccupancyGrid, '/topology/area', 10)
-        self.timer = self.create_timer(1, self.timer_callback)
+        self.timer = self.create_timer(0.2, self.timer_callback)
     
     def scan_callback(self, msg):
         self.scan = msg

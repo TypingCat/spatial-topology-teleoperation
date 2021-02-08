@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
 
+import time
+import pickle
+
 import rclpy
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
@@ -24,6 +27,7 @@ class Generate_topology(Node):
         self.scan_map_center = (
             int(self.scan_map_shape[0] // 2),
             int(self.scan_map_shape[1] // 2))
+        self.data = []
 
         # Initialize a ROS node
         super().__init__('waffle_topology_generate_topology')
@@ -31,7 +35,7 @@ class Generate_topology(Node):
         self.odom_subscription = self.create_subscription(Odometry, '/odom', self.odom_callback, 1)
         self.nodes_publisher = self.create_publisher(Marker, '/topology/nodes', 10)
         self.edges_publisher = self.create_publisher(Marker, '/topology/edges', 10)
-        
+
     def area_callback(self, msg):
         # Generate graph from gridmap message
         try:
@@ -50,15 +54,14 @@ class Generate_topology(Node):
         # except:
         #     pass
 
-        # Save intersections
+        # Save intersections only
         # for node in g.nodes:
         #     if len(node.neighbors) > 2:
         #         self.topology.nodes.append(node)
-        # print(len(self.topology.nodes))
 
-        # Save local topology
+        # Save observations
+        self.save_graph(g, 'data.pkl')
         self.topology = g
-        print(len(self.topology.nodes))
 
         # Visualize graph
         nodes_marker, edges_marker = self.topology.generate_markers(msg)
@@ -72,6 +75,22 @@ class Generate_topology(Node):
             msg.pose.pose.orientation.z,
             msg.pose.pose.orientation.w)
         self.robot_pose = [msg.pose.pose.position.x, msg.pose.pose.position.y, yaw]
+
+    def save_graph(self, graph, filename):
+        nodes, edges = [], []
+        for i, node in enumerate(graph.nodes):
+            nodes.append((node.point.x, node.point.y))
+            edges.extend([(i, graph.nodes.index(neighbor)) for neighbor in node.neighbors])
+
+        d = {}
+        d['time'] = time.time()
+        d['pose'] = [self.robot_pose[0], self.robot_pose[1]]
+        d['nodes'] = nodes
+        d['edges'] = edges
+        self.data.append(d)
+        
+        with open(filename, 'wb') as f:
+            pickle.dump(self.data, f)
 
 def main(args=None):
     rclpy.init(args=args)
