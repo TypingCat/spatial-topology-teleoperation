@@ -1,13 +1,19 @@
 # Waffle
 ROS2 package that develops wheeled mobile robot for semantic teleoperation
 
+The main purpose of this package is to service semantic commands such as 'turn left' and 'go to table'. The topology that extracted at 5Hz will make it possible. This topology basically represents the spatial structure and is ready to add things of interest. The robot can use it to guide teleoperation user or make decisions.
 
-## Goals
-The main purpose of this package is to service semantic commands such as 'turn left' and 'go to table'. There is no need to prepare a map in advance, because topology is extracted in real time. This topology contains spatial structure and things of interest. See issue [#3](https://github.com/TypingCat/waffle/issues/3) for details.
-
-The following is a simple demo video of the [local topology extraction](https://github.com/TypingCat/waffle/issues/6). This robot is moving from the hallway to the room, and extracting topology in real time. Note that intersections are represented by yellow points.
+The following is a simple demo video: This robot is moving from the hallway to the room. Black is the movable area detected by the LiDAR. Spatial structure is represented by graph. Yellow nodes are intersections, and red nodes are ends. The edges represent movability.
 
 ![extract_topology](https://user-images.githubusercontent.com/16618451/105449922-a6fae680-5cbc-11eb-8043-47b890e61912.gif)
+
+
+## Algorithms
+### [Local Topology Extraction](https://github.com/TypingCat/waffle/issues/12)
+Mobile robots should be able to explore the environment itself. This algorithm helps the robot to recognize the spatial structure of the environment. It receives observations and returns a graph. This graph is already a topology that shows movability, but the information quality can be further improved by adding things of interest.
+
+### [Topology Merge](https://github.com/TypingCat/waffle/issues/11)
+Mobile robots should be able to remember the environment. Information will be volatilized without the process of connecting local topologies. However, the spatial structure is difficult to estimate because it has coordinates even though there is no substance. Issue [#7](https://github.com/TypingCat/waffle/issues/7) is ongoing to solve this problem.
 
 
 ## Simple Usage
@@ -25,7 +31,7 @@ The following is a simple demo video of the [local topology extraction](https://
 
 
 ## Setup
-This package is being developed with [modified Turtlebot3](https://github.com/TypingCat/waffle/issues/8).
+This package is being developed with modified Turtlebot3. See issue [#8](https://github.com/TypingCat/waffle/issues/8) for details.
 
 ![hardware](https://user-images.githubusercontent.com/16618451/105457365-0ca19f80-5cca-11eb-8dd6-8a64d6c7ac5a.png)
 
