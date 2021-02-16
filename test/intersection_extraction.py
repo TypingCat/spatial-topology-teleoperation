@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import pickle
-# import plotly.express as px
 import plotly.graph_objects as go
 
 def get_edge(graph_list):
@@ -29,12 +28,10 @@ if __name__=='__main__':
         name='Local topology',
         x=local_topology[0],
         y=local_topology[1],
-        mode='lines+markers'
-    ))
+        mode='lines+markers'))
     fig.add_trace(go.Scatter(
         name='Robot position',
         x=robot_position[0],
         y=robot_position[1],
-        mode='lines+markers'
-    ))
+        mode='lines+markers'))
     fig.show()
