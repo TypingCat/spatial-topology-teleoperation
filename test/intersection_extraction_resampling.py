@@ -67,18 +67,6 @@ def resample(graph, robot_position, resolution):
 
     return g
 
-def get_edge(graph_list):
-    edge_x, edge_y = [], []
-
-    for graph in graph_list:
-        for e0, e1 in graph['edges']:
-            x0, y0 = graph['nodes'][e0]
-            x1, y1 = graph['nodes'][e1]
-            edge_x.extend([x0, x1, None])
-            edge_y.extend([y0, y1, None])
-
-    return [edge_x, edge_y]
-
 if __name__=='__main__':
     with open('test/intersection_extraction.pkl', 'rb') as f:
         data = pickle.load(f)
@@ -90,14 +78,11 @@ if __name__=='__main__':
 
     # Set parameters
     resolution = 1.
-    weight = 0.99
-    sim = 110
+    weight = 0.98
 
     # Global topology
     start = time.time()    
-    # for graph in data:
     for count, graph in enumerate(data):
-        # if count > sim: break
         start = time.time()
 
         # Resample local topology
@@ -118,7 +103,6 @@ if __name__=='__main__':
                     len_n = len(n.neighbors)
                     len_m = len(topology.nodes[i].neighbors)
                     if (len_n < 3 and len_m < 3) or (len_n >= 3 and len_m >= 3):
-                    # if (len_n < 3 and len_m < 3):
                         topology.nodes[i].point.x = weight*topology.nodes[i].point.x + (1-weight)*n.point.x
                         topology.nodes[i].point.y = weight*topology.nodes[i].point.y + (1-weight)*n.point.y
                 # Add far nodes
@@ -133,8 +117,6 @@ if __name__=='__main__':
             for neighbor in node.neighbors:
                 edge_resample_x.extend([node.point.x, neighbor.point.x, None])
                 edge_resample_y.extend([node.point.y, neighbor.point.y, None])
-
-    
 
     # Save local topology edges
     for graph in data:
@@ -152,11 +134,6 @@ if __name__=='__main__':
 
     # Show results
     fig = go.Figure()
-    # fig.add_trace(go.Scatter(
-    #     name='Local topology',
-    #     x=edge_x,
-    #     y=edge_y,
-    #     mode='lines+markers'))
     fig.add_trace(go.Scatter(
         name='Resampled Local topology',
         x=edge_resample_x,

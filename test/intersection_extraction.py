@@ -23,6 +23,7 @@ if __name__=='__main__':
         [d['pose'][0] for d in data],
         [d['pose'][1] for d in data]]
 
+    # Show results
     fig = go.Figure()
     fig.add_trace(go.Scatter(
         name='Local topology',
