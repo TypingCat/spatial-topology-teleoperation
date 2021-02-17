@@ -16,6 +16,11 @@ class Node:
         self.neighbors = []
         self.color = Color()
 
+    def add_neighbor(self, neighbor):
+        self.neighbors.append(neighbor)
+        self.color.edges.append(
+            [copy.deepcopy(Color.EDGE), copy.deepcopy(Color.EDGE)])
+
 class Color:
     NODE = ColorRGBA(r=0.53, g=0.9, b=0.5, a=0.2)        # Green
     EDGE = ColorRGBA(r=0.53, g=0.9, b=0.5, a=0.2)        # Green
@@ -57,7 +62,8 @@ class Graph:
             point = Point(x=p[0], y=p[1])
             self.add_node(point)
         for edge in edges_idx:
-            self.add_neighbor(edge)
+            # self.add_neighbor(edge)
+            self.nodes[edge[0]].add_neighbor(self.nodes[edge[1]])            
 
         # Update nodes color
         for node in self.nodes:
@@ -68,6 +74,7 @@ class Graph:
     
     def add_node(self, point):
         self.nodes.append(Node(point))
+        return self.nodes[-1]
 
     def add_neighbor(self, edge):
         if self.nodes[edge[0]] != self.nodes[edge[1]]:  # Reject circular loop

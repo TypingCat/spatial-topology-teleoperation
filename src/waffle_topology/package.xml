@@ -4,8 +4,8 @@
   <name>waffle_topology</name>
   <version>0.0.0</version>
   <description>TODO: Package description</description>
-  <maintainer email="fini@kakao.com">kist</maintainer>
-  <license>TODO: License declaration</license>
+  <maintainer email="jinhong.p.noh@gmail.com">fini</maintainer>
+  <license>GNU General Public License v2.0</license>
 
   <depend>rclpy</depend>
 

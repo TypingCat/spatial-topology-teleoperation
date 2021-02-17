@@ -13,10 +13,10 @@ setup(
     ],
     install_requires=['setuptools'],
     zip_safe=True,
-    maintainer='kist',
-    maintainer_email='fini@kakao.com',
+    maintainer='fini',
+    maintainer_email='jinhong.p.noh@gmail.com',
     description='TODO: Package description',
-    license='TODO: License declaration',
+    license='GNU General Public License v2.0',
     tests_require=['pytest'],
     entry_points={
         'console_scripts': [
