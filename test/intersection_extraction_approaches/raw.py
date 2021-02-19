@@ -16,7 +16,7 @@ def get_edge(graph_list):
     return [edge_x, edge_y]
 
 if __name__=='__main__':
-    with open('test/intersection_extraction.pkl', 'rb') as f:
+    with open('test/data/L8401-L8454.pkl', 'rb') as f:
         data = pickle.load(f)
     local_topology = get_edge(data)
     robot_position = [

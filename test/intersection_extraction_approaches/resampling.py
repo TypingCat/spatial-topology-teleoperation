@@ -68,7 +68,7 @@ def resample(graph, robot_position, resolution):
     return g
 
 if __name__=='__main__':
-    with open('test/intersection_extraction.pkl', 'rb') as f:
+    with open('test/data/L8401-L8454.pkl', 'rb') as f:
         data = pickle.load(f)
     edge_x, edge_y = [], []
     edge_resample_x, edge_resample_y = [], []

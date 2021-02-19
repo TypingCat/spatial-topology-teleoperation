@@ -6,7 +6,7 @@ from collections import deque
 import time
 
 if __name__=='__main__':
-    with open('test/intersection_extraction.pkl', 'rb') as f:
+    with open('test/data/L8401-L8454.pkl', 'rb') as f:
         data = pickle.load(f)
     queue = deque(maxlen=30)
     frames, steps = [], []
