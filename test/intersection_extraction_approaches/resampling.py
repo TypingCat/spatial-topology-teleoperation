@@ -10,6 +10,7 @@ from collections import deque
 from geometry_msgs.msg import Point
 
 from waffle_topology.graph import EmptyGraph
+from waffle_topology.visualization import create_frame, show
 
 def create_graph(points, edges=[]):
     graph = EmptyGraph()
@@ -96,7 +97,7 @@ if __name__=='__main__':
     with open('test/data/L8401-L8454.pkl', 'rb') as f:
         data = pickle.load(f)
     queue = deque(maxlen=5)
-    frames, steps = [], []
+    frames = []
     topology = EmptyGraph()
 
     # Set parameters
@@ -115,7 +116,7 @@ if __name__=='__main__':
         # Merge global and local topologies
         topology = merge(topology, g, resolution, weight)
 
-        # Create frame and step
+        # Create frame
         topology_local_x, topology_local_y = [], []
         for q in queue:
             for e0, e1 in q['edges']:
@@ -140,26 +141,12 @@ if __name__=='__main__':
         robot_trace = go.Scatter(
             name='Robot position',
             x=[robot_x], y=[robot_y],
-            mode='markers', marker=dict(size=20))
+            mode='markers', marker={'size': 20})
 
-        frames.append(go.Frame(
-            name=idx,
-            data=[topology_local_trace, topology_global_trace, robot_trace]))
-        steps.append({
-            'args': [[idx], dict(
-                frame=dict(duration=0),
-                transition=dict(duration=0))],
-            'label': idx,
-            'method': 'animate'})
-
-    print(f'Time elapsed: {time.time() - start}')
+        frames.append(create_frame(
+            [topology_local_trace, topology_global_trace, robot_trace], idx))
 
     # Show results
-    fig = go.Figure(
-        data=frames[0].data, frames=frames)
-    fig.update_layout(
-        sliders=[dict(steps=steps)],
-        xaxis_range=[0, 18], yaxis_range=[-14, 2])
-    fig.show()
-
+    print(f'Time elapsed: {time.time() - start}')
+    show(frames)
     print(f'Time elapsed: {time.time() - start}')

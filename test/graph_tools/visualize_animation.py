@@ -5,12 +5,13 @@ import time
 import plotly.graph_objects as go
 
 from collections import deque
+from waffle_topology.visualization import create_frame, show
 
 if __name__=='__main__':
     with open('test/data/L8401-L8454.pkl', 'rb') as f:
         data = pickle.load(f)
     queue = deque(maxlen=5)
-    frames, steps = [], []
+    frames = []
     
     # Span local topology over time
     start = time.time()
@@ -19,7 +20,7 @@ if __name__=='__main__':
 
         # ...
 
-        # Create frame and step
+        # Create frame
         edges_x, edges_y = [], []
         for q in queue:
             for e0, e1 in q['edges']:
@@ -36,24 +37,9 @@ if __name__=='__main__':
             x=[robot_x], y=[robot_y],
             mode='markers', marker=dict(size=20))
 
-        frames.append(go.Frame(
-            name=idx,
-            data=[edges_trace, robot_trace]))
-        steps.append({
-            'args': [[idx], dict(
-                frame=dict(duration=0),
-                transition=dict(duration=0))],
-            'label': idx,
-            'method': 'animate'})
-
-    print(f'Time elapsed: {time.time() - start}')
+        frames.append(create_frame([edges_trace, robot_trace], idx))
 
     # Show results
-    fig = go.Figure(
-        data=frames[0].data, frames=frames)
-    fig.update_layout(
-        sliders=[dict(steps=steps)],
-        xaxis_range=[0, 18], yaxis_range=[-14, 2])
-    fig.show()
-
+    print(f'Time elapsed: {time.time() - start}')
+    show(frames)
     print(f'Time elapsed: {time.time() - start}')
