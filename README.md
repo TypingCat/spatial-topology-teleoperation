@@ -13,7 +13,7 @@ The following is a simple demo video: This robot is moving from the hallway to t
 Mobile robots should be able to explore the environment itself. This algorithm helps the robot to recognize the spatial structure of the environment. It receives observations and returns a graph. This graph is already a topology that shows movability, but the information quality can be further improved by adding things of interest.
 
 ### [Topology Merge](https://github.com/TypingCat/waffle/issues/11)
-Mobile robots should be able to remember the environment. Information will be volatilized without the process of connecting local topologies. However, the spatial structure is difficult to estimate because it has coordinates even though there is no substance. Issue [#7](https://github.com/TypingCat/waffle/issues/7) is ongoing to solve this problem.
+Mobile robots should be able to remember the environment. Information will be volatilized without the process of connecting local topologies. However, the spatial structure is difficult to estimate because it has coordinates even though there is no substance. As a result of the test [#7](https://github.com/TypingCat/waffle/issues/13), intersection clustering approach was adopted. This approach detects probabilistically significant intersections.
 
 
 ## Simple Usage

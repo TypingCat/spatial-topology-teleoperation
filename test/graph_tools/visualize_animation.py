@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 
 import pickle
-import plotly.graph_objects as go
-from collections import deque
 import time
+import plotly.graph_objects as go
+
+from collections import deque
 
 if __name__=='__main__':
     with open('test/data/L8401-L8454.pkl', 'rb') as f:
         data = pickle.load(f)
-    queue = deque(maxlen=30)
+    queue = deque(maxlen=5)
     frames, steps = [], []
     
     # Span local topology over time
@@ -18,11 +19,12 @@ if __name__=='__main__':
 
         # ...
 
-        # Create frame
+        # Create frame and step
         edges_x, edges_y = [], []
         for q in queue:
-            edges_x.extend(sum([[q['nodes'][e0][0], q['nodes'][e1][0], None] for e0, e1 in q['edges']], []))
-            edges_y.extend(sum([[q['nodes'][e0][1], q['nodes'][e1][1], None] for e0, e1 in q['edges']], []))
+            for e0, e1 in q['edges']:
+                edges_x.extend([q['nodes'][e0][0], q['nodes'][e1][0], None])
+                edges_y.extend([q['nodes'][e0][1], q['nodes'][e1][1], None])
         edges_trace = go.Scatter(
             name='Local topology',
             x=edges_x, y=edges_y,
@@ -37,8 +39,6 @@ if __name__=='__main__':
         frames.append(go.Frame(
             name=idx,
             data=[edges_trace, robot_trace]))
-
-        # Add step info.
         steps.append({
             'args': [[idx], dict(
                 frame=dict(duration=0),
