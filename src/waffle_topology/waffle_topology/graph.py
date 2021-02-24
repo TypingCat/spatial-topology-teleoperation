@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 
-from nav_msgs.msg import OccupancyGrid
-from geometry_msgs.msg import Point
-from std_msgs.msg import ColorRGBA
-from visualization_msgs.msg import Marker
-
 import cv2
 import numpy as np
 import math
 import copy
+
+from nav_msgs.msg import OccupancyGrid
+from geometry_msgs.msg import Point
+from std_msgs.msg import ColorRGBA
+from visualization_msgs.msg import Marker
 
 class Node:
     def __init__(self, point:Point):

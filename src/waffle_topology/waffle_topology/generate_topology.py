@@ -2,12 +2,11 @@
 
 import time
 import pickle
-
 import rclpy
+
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
-from nav_msgs.msg import OccupancyGrid
-from nav_msgs.msg import Odometry
+from nav_msgs.msg import OccupancyGrid, Odometry
 from visualization_msgs.msg import Marker
 
 from waffle_topology.graph import Graph

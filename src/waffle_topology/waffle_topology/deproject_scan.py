@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
 
 import rclpy
+import cv2
+import numpy as np
+import math
+
 from rclpy.node import Node
 from sensor_msgs.msg import LaserScan
 from sensor_msgs.msg import PointCloud
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Point32
-
-import cv2
-import numpy as np
-import math
 
 class Deproject_scan(Node):
     def __init__(self):

@@ -3,7 +3,7 @@
 <package format="3">
   <name>waffle_topology</name>
   <version>0.0.0</version>
-  <description>TODO: Package description</description>
+  <description>Semantic teleoperation of wheeled mobile robot: waffle</description>
   <maintainer email="jinhong.p.noh@gmail.com">fini</maintainer>
   <license>GNU General Public License v2.0</license>
 

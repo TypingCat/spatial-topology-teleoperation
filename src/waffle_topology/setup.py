@@ -15,7 +15,7 @@ setup(
     zip_safe=True,
     maintainer='fini',
     maintainer_email='jinhong.p.noh@gmail.com',
-    description='TODO: Package description',
+    description='Semantic teleoperation of wheeled mobile robot: waffle',
     license='GNU General Public License v2.0',
     tests_require=['pytest'],
     entry_points={
