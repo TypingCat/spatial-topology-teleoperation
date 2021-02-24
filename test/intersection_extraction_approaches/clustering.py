@@ -46,7 +46,7 @@ def get_intersection(graph):
 if __name__=='__main__':
     with open('test/data/L8401-L8454.pkl', 'rb') as f:
         data = pickle.load(f)
-    queue = deque(maxlen=10)
+    queue = deque(maxlen=30)
     resolution = 1.
     frames = []
     
@@ -92,12 +92,6 @@ if __name__=='__main__':
 
         frames.append(create_frame(
             [topology_local_trace, robot_trace] + intersection_trace, idx))
-
-    # Fill up the frame blanks
-    trace_num = max([len(frame[0].data) for frame in frames])
-    blank = [go.Scatter(name='Blank', x=[], y=[])]
-    for frame in frames:
-        frame[0].data = list(frame[0].data) + blank*(trace_num - len(frame[0].data))
 
     # Show results
     print(f'Time elapsed: {time.time() - start}')
