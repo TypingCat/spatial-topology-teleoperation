@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import plotly.graph_objects as go
+import numpy as np
 
 def create_frame(traces, idx):
     frame = go.Frame(name=idx, data=traces)
@@ -56,3 +57,15 @@ def show(frames, hz=50):
         updatemenus = [{'buttons': [fig_button_play, fig_button_stop], 'type': 'buttons'}],
         xaxis_range=range_x, yaxis_range=range_y)
     fig.show()
+
+def get_ellipse_contour(center=[0, 0], axis=[[1, 0], [0, 1]], size=[1, 1], contour_num=100):
+    # Draw ellipse on coordinate [[1, 0], [0, 1]]
+    t = np.linspace(0, 2*np.pi, contour_num)
+    xs = size[0] * np.cos(t)
+    ys = size[1] * np.sin(t)
+
+    # Rotate ellipse to fit in coordinate [axis[0], axis[1]]
+    R = np.array(axis).T
+    xp, yp = np.dot(R, [xs, ys])
+
+    return xp + center[0], yp + center[1]
