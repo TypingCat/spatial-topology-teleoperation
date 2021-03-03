@@ -15,12 +15,17 @@ if __name__=='__main__':
     
     # Span local topology over time
     start = time.time()
-    for idx, graph in enumerate(data):
+    for idx, graph in enumerate(data['topology']):
         queue.append(graph)
 
         # ...
 
         # Create frame
+        map_trace = go.Scatter(
+            name='Map',
+            x=data['map'][0], y=data['map'][1],
+            mode='lines')
+        
         edges_x, edges_y = [], []
         for q in queue:
             for e0, e1 in q['edges']:
@@ -37,7 +42,7 @@ if __name__=='__main__':
             x=[robot_x], y=[robot_y],
             mode='markers', marker=dict(size=20))
 
-        frames.append(create_frame([edges_trace, robot_trace], idx))
+        frames.append(create_frame([map_trace, edges_trace, robot_trace], idx))
 
     # Show results
     print(f'Time elapsed: {time.time() - start}')

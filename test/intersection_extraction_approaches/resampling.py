@@ -106,7 +106,7 @@ if __name__=='__main__':
     
     # Span local topology over time
     start = time.time()
-    for idx, graph in enumerate(data):
+    for idx, graph in enumerate(data['topology']):
         queue.append(graph)
 
         # Resample local topology
@@ -117,6 +117,11 @@ if __name__=='__main__':
         topology = merge(topology, g, resolution, weight)
 
         # Create frame
+        map_trace = go.Scatter(
+            name='Map',
+            x=data['map'][0], y=data['map'][1],
+            mode='lines')
+
         topology_local_x, topology_local_y = [], []
         for q in queue:
             for e0, e1 in q['edges']:
@@ -144,7 +149,7 @@ if __name__=='__main__':
             mode='markers', marker={'size': 20})
 
         frames.append(create_frame(
-            [topology_local_trace, topology_global_trace, robot_trace], idx))
+            [map_trace, topology_local_trace, topology_global_trace, robot_trace], idx))
 
     # Show results
     print(f'Time elapsed: {time.time() - start}')

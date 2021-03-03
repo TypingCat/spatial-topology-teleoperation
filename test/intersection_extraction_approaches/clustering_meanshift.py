@@ -52,7 +52,7 @@ if __name__=='__main__':
     
     # Span local topology over time
     start = time.time()
-    for idx, graph in enumerate(data):
+    for idx, graph in enumerate(data['topology']):
         queue.append(graph)
 
         # Get intersection
@@ -67,6 +67,11 @@ if __name__=='__main__':
         meanshift, pca, intersection_pos_cluster = clustering(intersection_pos, resolution)
 
         # Create frame
+        map_trace = go.Scatter(
+            name='Map',
+            x=data['map'][0], y=data['map'][1],
+            mode='lines')
+
         topology_local_x, topology_local_y = [], []
         for q in queue:
             for e0, e1 in q['edges']:
@@ -91,7 +96,7 @@ if __name__=='__main__':
                 mode='markers'))
 
         frames.append(create_frame(
-            [topology_local_trace, robot_trace] + intersection_trace, idx))
+            [map_trace, topology_local_trace, robot_trace] + intersection_trace, idx))
 
     # Show results
     print(f'Time elapsed: {time.time() - start}')
