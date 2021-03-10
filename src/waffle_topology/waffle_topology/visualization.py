@@ -1,7 +1,25 @@
 #!/usr/bin/env python3
 
+import copy
+import math
 import plotly.graph_objects as go
-import numpy as np
+
+from visualization_msgs.msg import Marker
+from geometry_msgs.msg import Point
+from std_msgs.msg import ColorRGBA
+
+from waffle_topology.calculation import euler_to_quaternion
+
+class Color:
+    NODE = ColorRGBA(r=0.53, g=0.9, b=0.5, a=0.2)        # Green
+    EDGE = ColorRGBA(r=0.53, g=0.9, b=0.5, a=0.2)        # Green
+    INTERSECTION = ColorRGBA(r=0., g=0.33, b=1., a=0.2)  # Blue
+    CLUSTER = ColorRGBA(r=1., g=0.73, b=0., a=0.6)       # Yellow
+    LEAF = ColorRGBA(r=0.95, g=0.37, b=0.37, a=0.2)      # Red
+
+    def __init__(self):
+        self.node = copy.deepcopy(Color.NODE)
+        self.edges = []
 
 def create_frame(traces, idx):
     frame = go.Frame(name=idx, data=traces)
@@ -14,7 +32,7 @@ def create_frame(traces, idx):
     
     return [frame, step]
 
-def show(frames, hz=50):
+def show_frames(frames, hz=50):
     """Visualize frames with play button and slider"""
 
     # Fill up the frame blanks
@@ -58,14 +76,59 @@ def show(frames, hz=50):
         xaxis_range=range_x, yaxis_range=range_y)
     fig.show()
 
-def get_ellipse_contour(center=[0, 0], axis=[[1, 0], [0, 1]], size=[1, 1], contour_num=100):
-    # Draw ellipse on coordinate [[1, 0], [0, 1]]
-    t = np.linspace(0, 2*np.pi, contour_num)
-    xs = size[0] * np.cos(t)
-    ys = size[1] * np.sin(t)
+def create_graph_marker(nodes, header):
+    # Initialize node marker
+    nodes_marker = Marker()
+    nodes_marker.header = copy.deepcopy(header)
+    nodes_marker.header.frame_id = 'odom'
+    nodes_marker.ns = 'node'
+    nodes_marker.id = 0
+    nodes_marker.type = Marker.POINTS
+    nodes_marker.action = Marker.ADD
+    nodes_marker.scale.x = 0.1      # Point width
+    nodes_marker.scale.y = 0.1      # Point height
 
-    # Rotate ellipse to fit in coordinate [axis[0], axis[1]]
-    R = np.array(axis).T
-    xp, yp = np.dot(R, [xs, ys])
+    # Initialize edge marker
+    edges_marker = Marker()
+    edges_marker.header = copy.deepcopy(header)
+    edges_marker.header.frame_id = 'odom'
+    edges_marker.ns = 'edge'
+    edges_marker.id = 0
+    edges_marker.type = Marker.LINE_LIST
+    edges_marker.action = Marker.ADD
+    edges_marker.scale.x = 0.03     # Line width
 
-    return xp + center[0], yp + center[1]
+    # Fill in the rest
+    for node in nodes:
+        nodes_marker.points.append(Point(x=-node.point.x, y=-node.point.y, z=0.2))
+        nodes_marker.colors.append(node.color.node)
+        for i, neighbor in enumerate(node.neighbors):
+            edges_marker.points.append(Point(x=-node.point.x, y=-node.point.y, z=0.1))
+            edges_marker.points.append(Point(x=-neighbor.point.x, y=-neighbor.point.y, z=0.1))
+            edges_marker.colors.append(node.color.edges[i][0])
+            edges_marker.colors.append(node.color.edges[i][1])
+
+    return nodes_marker, edges_marker
+
+def create_intersection_marker(label, center, axis, size, header):
+    qx, qy, qz, qw = euler_to_quaternion(math.atan2(axis[0][1], axis[0][0]), 0., 0.)
+    marker = Marker()
+
+    marker.header = copy.deepcopy(header)
+    marker.header.frame_id = 'odom'
+    marker.ns = 'intersection'
+    marker.id = int(label)
+    marker.type = Marker.CYLINDER
+    marker.action = Marker.ADD
+    marker.pose.position.x = center[0]
+    marker.pose.position.y = center[1]
+    marker.pose.orientation.x = qx
+    marker.pose.orientation.y = qy
+    marker.pose.orientation.z = qz
+    marker.pose.orientation.w = qw
+    marker.scale.x = size[0]    # Diameter x
+    marker.scale.y = size[1]    # Diameter y
+    marker.scale.z = 1.         # Height
+    marker.color = Color.CLUSTER
+
+    return marker

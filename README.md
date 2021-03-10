@@ -15,17 +15,19 @@ Mobile robots should be able to explore the environment itself. This algorithm h
 ### [Topology Merge](https://github.com/TypingCat/waffle/issues/11)
 Mobile robots should be able to remember the environment. Information will be volatilized without the process of connecting local topologies. However, the spatial structure is difficult to estimate because it has coordinates even though there is no substance. As a result of the test [#7](https://github.com/TypingCat/waffle/issues/13), intersection clustering approach was adopted. This approach detects probabilistically significant intersections.
 
+### [Intersection Clustering](https://github.com/TypingCat/waffle/issues/17)
+One of the important features of the spatial structure is the intersection. This package can recognize intersections as 10Hz. It can be a criterion for the robot to determine semantic direction. For a robot with an intersection in front of it, the right is the edge vector that extends to the right from the intersection.
+
 
 ## Simple Usage
-- Control a mobile robot
+1. Wake up waffle
     ``` bash
     ros2 launch waffle wakeup.launch.py
-    ros2 launch waffle getup.launch.py
-    ros2 launch waffle play.launch.py
     ```
-- Generate topology
+2. Start teleoperation
     ``` bash
-    ros2 run waffle_topology deproject_scan
+    ros2 launch waffle play.launch.py
+    ros2 run teleop_twist_keyboard teleop_twist_keyboard
     ros2 run waffle_topology generate_topology
     ```
 

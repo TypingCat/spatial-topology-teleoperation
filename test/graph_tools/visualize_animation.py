@@ -5,7 +5,7 @@ import time
 import plotly.graph_objects as go
 
 from collections import deque
-from waffle_topology.visualization import create_frame, show
+from waffle_topology.visualization import create_frame, show_frames
 
 if __name__=='__main__':
     with open('test/data/L8401-L8454.pkl', 'rb') as f:
@@ -46,5 +46,5 @@ if __name__=='__main__':
 
     # Show results
     print(f'Time elapsed: {time.time() - start}')
-    show(frames)
+    show_frames(frames)
     print(f'Time elapsed: {time.time() - start}')

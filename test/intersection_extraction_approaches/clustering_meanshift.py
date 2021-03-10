@@ -8,7 +8,7 @@ from collections import deque, defaultdict
 from sklearn.cluster import MeanShift
 from sklearn.decomposition import PCA
 
-from waffle_topology.visualization import create_frame, show
+from waffle_topology.visualization import create_frame, show_frames
 
 def clustering(points, bandwidth):
     if not points: return [], [], []
@@ -100,5 +100,5 @@ if __name__=='__main__':
 
     # Show results
     print(f'Time elapsed: {time.time() - start}')
-    show(frames)
+    show_frames(frames)
     print(f'Time elapsed: {time.time() - start}')

@@ -10,7 +10,7 @@ from collections import deque
 from geometry_msgs.msg import Point
 
 from waffle_topology.graph import EmptyGraph
-from waffle_topology.visualization import create_frame, show
+from waffle_topology.visualization import create_frame, show_frames
 
 def create_graph(points, edges=[]):
     graph = EmptyGraph()
@@ -153,5 +153,5 @@ if __name__=='__main__':
 
     # Show results
     print(f'Time elapsed: {time.time() - start}')
-    show(frames)
+    show_frames(frames)
     print(f'Time elapsed: {time.time() - start}')

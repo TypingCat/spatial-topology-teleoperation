@@ -7,8 +7,11 @@ import copy
 
 from nav_msgs.msg import OccupancyGrid
 from geometry_msgs.msg import Point
-from std_msgs.msg import ColorRGBA
-from visualization_msgs.msg import Marker
+from collections import deque, defaultdict
+from sklearn.cluster import Birch
+from sklearn.decomposition import PCA
+
+from waffle_topology.visualization import Color
 
 class Node:
     def __init__(self, point:Point):
@@ -20,16 +23,6 @@ class Node:
         self.neighbors.append(neighbor)
         self.color.edges.append(
             [copy.deepcopy(Color.EDGE), copy.deepcopy(Color.EDGE)])
-
-class Color:
-    NODE = ColorRGBA(r=0.53, g=0.9, b=0.5, a=0.2)        # Green
-    EDGE = ColorRGBA(r=0.53, g=0.9, b=0.5, a=0.2)        # Green
-    INTERSECTION = ColorRGBA(r=1., g=0.73, b=0., a=0.2)  # Yellow
-    LEAF = ColorRGBA(r=0.95, g=0.37, b=0.37, a=0.2)      # Red
-
-    def __init__(self):
-        self.node = copy.deepcopy(Color.NODE)
-        self.edges = []
 
 class Graph:
     """Linked list graph"""
@@ -90,55 +83,6 @@ class Graph:
                 j = int(n / msg.info.width)
                 img[i, j] = 255
         return img
-
-    def quaternion_to_euler(x, y, z, w):
-        """Only returns yaw"""
-
-        # t0 = 2.*(w*x + y*z)
-        # t1 = 1. - 2.*(x*x + y*y)
-        # roll = math.atan2(t0, t1)
-        # t2 = 2.*(w*y - z*x)
-        # t2 = 1. if t2 > 1. else t2
-        # t2 = -1. if t2 < -1. else t2
-        # pitch = math.asin(t2)
-        t3 = 2.*(w*z + x*y)
-        t4 = 1. - 2.*(y*y + z*z)
-        yaw = math.atan2(t3, t4)
-        return yaw
-
-    def generate_markers(self, msg):
-        # Initialize node marker
-        nodes_marker = Marker()
-        nodes_marker.header = copy.deepcopy(msg.header)
-        nodes_marker.header.frame_id = 'odom'
-        nodes_marker.ns = 'node'
-        nodes_marker.id = 0
-        nodes_marker.type = Marker.POINTS
-        nodes_marker.action = Marker.ADD
-        nodes_marker.scale.x = 0.1      # Point width
-        nodes_marker.scale.y = 0.1      # Point height
-
-        # Initialize edge marker
-        edges_marker = Marker()
-        edges_marker.header = copy.deepcopy(msg.header)
-        edges_marker.header.frame_id = 'odom'
-        edges_marker.ns = 'edge'
-        edges_marker.id = 0
-        edges_marker.type = Marker.LINE_LIST
-        edges_marker.action = Marker.ADD
-        edges_marker.scale.x = 0.03     # Line width
-
-        # Fill in the rest
-        for node in self.nodes:
-            nodes_marker.points.append(Point(x=-node.point.x, y=-node.point.y, z=0.2))
-            nodes_marker.colors.append(node.color.node)
-            for i, neighbor in enumerate(node.neighbors):
-                edges_marker.points.append(Point(x=-node.point.x, y=-node.point.y, z=0.1))
-                edges_marker.points.append(Point(x=-neighbor.point.x, y=-neighbor.point.y, z=0.1))
-                edges_marker.colors.append(node.color.edges[i][0])
-                edges_marker.colors.append(node.color.edges[i][1])
-
-        return nodes_marker, edges_marker
         
     def _search_edges_idx(nodes, contours, dist_threshold=3):
         """Search node connectivity from contour"""
@@ -208,3 +152,38 @@ class Graph:
 class EmptyGraph(Graph):
     def __init__(self):
         self.nodes = []
+
+class Clustering:
+    """Point clustering using BIRCH"""
+
+    def __init__(self, cluster_threshold=1, cluster_min=10, cluster_max=500):
+        self.birch = Birch(
+            threshold=cluster_threshold,
+            n_clusters=None,
+            branching_factor=cluster_max)
+        self.pca = PCA(n_components=2)
+        self.cluster_min, self.cluster_max = cluster_min, cluster_max
+        self.cluster = defaultdict(deque)
+        self.info = defaultdict(dict)
+
+    def append(self, points):
+        if not points: return
+
+        # Online clustering
+        self.birch.partial_fit(points)
+        label = self.birch.predict(points)
+
+        # Store results in queue dictionary
+        for i, l in enumerate(label):
+            self.cluster[l].appendleft(points[i])
+            if len(self.cluster[l]) > self.cluster_max:
+                self.cluster[l].pop()
+
+        # Principal Component Analysis for each cluster
+        for l, c in self.cluster.items():
+            if len(c) < 3: continue
+
+            p = self.pca.fit(c)
+            self.info[l]['mean'] = p.mean_
+            self.info[l]['components'] = p.components_
+            self.info[l]['std'] = [math.sqrt(v) for v in p.explained_variance_]

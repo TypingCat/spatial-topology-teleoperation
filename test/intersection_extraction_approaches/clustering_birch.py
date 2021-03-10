@@ -9,7 +9,8 @@ from collections import deque, defaultdict
 from sklearn.cluster import Birch, MeanShift
 from sklearn.decomposition import PCA
 
-from waffle_topology.visualization import create_frame, show, get_ellipse_contour
+from waffle_topology.visualization import create_frame, show_frames
+from waffle_topology.calculation import get_ellipse_contour
 
 def get_intersection(graph):
     """Return intersection nodes and its neighbors position"""
@@ -28,7 +29,7 @@ def get_intersection(graph):
 def store_intersection(label, intersection_pos, intersection_edge, cluster_pos, cluster_leg):
     """Store intersections in clusters by label"""
     # cluster_pos: Position of the intersection
-    # cluster_leg: Unit vector of the intersection legs    
+    # cluster_leg: Unit vector of the intersection legs
 
     for i, l in enumerate(label):
         cluster_pos[l].appendleft(intersection_pos[i])
@@ -129,5 +130,5 @@ if __name__=='__main__':
 
     # Show results
     print(f'Time elapsed: {time.time() - start}')
-    show(frames)
+    show_frames(frames)
     print(f'Time elapsed: {time.time() - start}')
