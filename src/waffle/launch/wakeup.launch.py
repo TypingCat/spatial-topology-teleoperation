@@ -25,7 +25,7 @@ def generate_launch_description():
             remappings=[('/tf_static', 'tf_realsense')]),
         Node(
             package='waffle_topology',
-            node_executable='waffle_deproject_scan',
-            node_name='deproject_scan',
+            node_executable='deproject_scan',
+            node_name='waffle_deproject_scan',
             output='screen'),
     ])
